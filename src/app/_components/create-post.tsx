@@ -63,7 +63,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
       {formShow && (
         <div className="flex justify-center">
           <form
-            className="flex w-1/4 md:w-1/2 flex-col items-center gap-3 rounded-lg bg-orange-300 p-3 text-lg"
+            className="flex w-1/2 md:w-1/3 flex-col items-center gap-3 rounded-lg bg-orange-300 p-3 text-lg"
             onSubmit={addPost}
           >
             Add new record
