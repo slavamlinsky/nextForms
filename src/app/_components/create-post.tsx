@@ -6,27 +6,42 @@ import { useRef, useState } from "react";
 import { api } from "~/trpc/react";
 
 interface CreatePostProps {
-  onClick: (text: string) => void;
+  onSuccess?: ((text: string) => void) | undefined  
 }
 
 
-export function CreatePost(props: CreatePostProps) {
+export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
   const [formShow, setFormShow] = useState(true);  
   const [inputText, setInputText] = useState<string>("");
-
-  const mutation = api.post.create.useMutation({
-    onSuccess: () => null,
-  });
 
   const showForm = () => {
     setFormShow((prev) => !prev);
   };
 
-  const addPost = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();    
-    props.onClick(inputText);
-    setInputText("");
-    setFormShow(false);
+  const mutation = api.post.create.useMutation({    
+    onSuccess: () => {    
+      if (onSuccess) {
+        onSuccess(inputText);        
+        // clear input field
+        setInputText("");
+        // hide form
+        setFormShow(false);
+      }
+    },
+  });  
+
+  const addPost = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      await mutation.mutateAsync({name: inputText});
+    } catch (error) {
+      console.error('Mutation failed:', error);
+    }
+
+    // props.onClick(inputText);
+    // setInputText("");
+    // setFormShow(false);
   };
 
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {    
@@ -48,7 +63,7 @@ export function CreatePost(props: CreatePostProps) {
       {formShow && (
         <div className="flex justify-center">
           <form
-            className="flex w-1/4 flex-col items-center gap-3 rounded-lg bg-orange-300 p-3 text-lg"
+            className="flex w-1/4 md:w-1/2 flex-col items-center gap-3 rounded-lg bg-orange-300 p-3 text-lg"
             onSubmit={addPost}
           >
             Add new record
