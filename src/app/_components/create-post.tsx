@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { ReactElement, useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
 import Loader from "./loader";
@@ -34,18 +34,28 @@ export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
 
   const addPost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    try {
-      setIsLoading(true);
-      await mutation.mutateAsync({ name: inputText });
-    } catch (error) {
-      console.error("Mutation failed:", error);
-    } finally {
-      setIsLoading(false);
+    if (inputText) {
+      try {
+        setIsLoading(true);
+        await mutation.mutateAsync({ name: inputText });
+      } catch (error) {
+        console.error("Mutation failed:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
     // props.onClick(inputText);
     // setInputText("");
     // setFormShow(false);
+  };
+
+  const handleModalClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.target as HTMLDivElement;
+    const insideModal = el.closest("[data-id=modalbox]");
+    ;
+    if (insideModal) return;
+
+    setFormShow(false);
   };
 
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,22 +64,26 @@ export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div>
+    <div className="p-3">
       <button
         onClick={showForm}
-        className="border border-gray-800 bg-gray-500 p-2"
+        className="rounded-md border border-gray-800 bg-gray-500 p-2"
       >
-        Post
+        Add Post
       </button>
 
       <p>^ open dialog with post form</p>
 
       {formShow && (
-        <div className="flex justify-center">
+        <div
+          onClick={handleModalClick}
+          className="fixed left-0 top-0 flex min-h-screen w-full items-center justify-center bg-slate-300 opacity-90 backdrop-blur-2xl"
+        >
           {isLoading && <Loader />}
           {!isLoading && (
-            <form
-              className="flex w-2/3 flex-col items-center gap-3 rounded-lg bg-orange-300 p-3 text-lg md:w-1/3"
+            <div data-id="modalbox" className=" w-2/3 md:w-1/3">
+            <form               
+              className="flex flex-col items-center gap-3 rounded-lg bg-slate-500 p-3 text-lg w-full"
               onSubmit={addPost}
             >
               Add new record
@@ -77,15 +91,16 @@ export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
                 value={inputText}
                 onChange={handleTextChange}
                 type="text"
-                placeholder="new task"
+                placeholder="new record title"
                 className="w-full px-3 py-2"
               />
               <input
                 type="submit"
                 value="add"
-                className="cursor-pointer rounded-md bg-slate-200 px-5 py-1 hover:bg-teal-200"
+                className="cursor-pointer rounded-md bg-slate-300 px-5 py-1 hover:bg-slate-200 hover:px-6"
               />
             </form>
+            </div>
           )}
         </div>
       )}
