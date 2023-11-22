@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ReactElement, useRef, useState } from "react";
+import { useState } from "react";
 
 import { api } from "~/trpc/react";
 import Loader from "./loader";
@@ -11,10 +11,8 @@ interface CreatePostProps {
 }
 
 export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
-  const [formShow, setFormShow] = useState(true);
-  const [inputText, setInputText] = useState<string>("");
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [formShow, setFormShow] = useState(false);
+  const [inputText, setInputText] = useState<string>("");  
 
   const showForm = () => {
     setFormShow((prev) => !prev);
@@ -24,6 +22,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
     onSuccess: () => {
       if (onSuccess) {
         onSuccess(inputText);
+        
         // clear input field
         setInputText("");
         // hide form
@@ -35,14 +34,11 @@ export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
   const addPost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (inputText) {
-      try {
-        setIsLoading(true);
+      try {        
         await mutation.mutateAsync({ name: inputText });
       } catch (error) {
         console.error("Mutation failed:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      }       
     }
     // props.onClick(inputText);
     // setInputText("");
@@ -79,8 +75,8 @@ export const CreatePost: React.FC<CreatePostProps> = ({ onSuccess }) => {
           onClick={handleModalClick}
           className="fixed left-0 top-0 flex min-h-screen w-full items-center justify-center bg-slate-300 opacity-90 backdrop-blur-2xl"
         >
-          {isLoading && <Loader />}
-          {!isLoading && (
+          {mutation.isLoading && <Loader />}
+          {!mutation.isLoading && (
             <div data-id="modalbox" className=" w-2/3 md:w-1/3">
             <form               
               className="flex flex-col items-center gap-3 rounded-lg bg-slate-500 p-3 text-lg w-full"
